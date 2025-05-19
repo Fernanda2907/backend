@@ -52,14 +52,15 @@ app.post("/login", (req, res) => {
 // Microservicio de datos personales
 app.get("/userinfo", (req, res) => {
     const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        authHeader = authHeader.split(" ")[1]
+    }
+    if (!authHeader) {
         return res.status(401).json({ message: "Token requerido" })
     }
 
-    const token = authHeader.split(" ")[1]
-
     try {
-        const payload = jwt.verify(token, SECRET_KEY)
+        const payload = jwt.verify(authHeader, SECRET_KEY)
         const user = USERS.find((u) => u.cedula === payload.cedula)
 
         if (!user) {
